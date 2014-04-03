@@ -25,7 +25,9 @@ namespace TorExitNodeManager
 
         public Boolean IsAddressTorExitNode(String ipAddress)
         {
-            return (_cache.Data.Contains(ipAddress));
+            if (_cache != null && _cache.Data != null && _cache.Data.Count > 0)
+                return (_cache.Data.Contains(ipAddress));
+            return false;
         }
 
         public Boolean IsAddressTorExitNode(IPAddress ipAddress)

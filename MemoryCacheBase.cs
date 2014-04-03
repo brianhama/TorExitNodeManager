@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace TorExitNodeManager
 {
-    internal abstract class MemoryCacheBase<T>
+    internal abstract class MemoryCacheBase<T> where T: new()
     {
         protected TimeSpan _ttl = TimeSpan.FromMinutes(new Random().Next(5, 10));
         private readonly ManualResetEventSlim _hasDataLock = new ManualResetEventSlim(false);
@@ -24,7 +24,7 @@ namespace TorExitNodeManager
                         return _cache;
                 }
                 finally { _updateLock.ExitReadLock(); }
-                return default(T);
+                return new T();
             }
         }
 
@@ -41,7 +41,7 @@ namespace TorExitNodeManager
             {
                 Task.Factory.StartNew(new Action(PopulateCache));
 
-                _hasDataLock.Wait();
+                _hasDataLock.Wait(2500);
             }
         }
 
