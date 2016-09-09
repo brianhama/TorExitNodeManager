@@ -1,12 +1,11 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 
 namespace TorExitNodeManager
 {
     public class ExitNodeManager
     {
-        private static ExitNodeManager _current = null;
-        private ExitNodeCache _cache;
+        private static ExitNodeManager _current;
+        private readonly ExitNodeCache _cache;
 
         private ExitNodeManager()
         {
@@ -23,14 +22,14 @@ namespace TorExitNodeManager
             }
         }
 
-        public Boolean IsAddressTorExitNode(String ipAddress)
+        public bool IsAddressTorExitNode(string ipAddress)
         {
             if (_cache != null && _cache.Data != null && _cache.Data.Count > 0)
                 return (_cache.Data.Contains(ipAddress));
             return false;
         }
 
-        public Boolean IsAddressTorExitNode(IPAddress ipAddress)
+        public bool IsAddressTorExitNode(IPAddress ipAddress)
         {
             return IsAddressTorExitNode(ipAddress.ToString());
         }

@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 namespace TorExitNodeManager
 {
-    internal abstract class MemoryCacheBase<T> where T: new()
+    internal abstract class MemoryCacheBase<T> where T : new()
     {
-        protected TimeSpan _ttl = TimeSpan.FromMinutes(new Random().Next(5, 10));
         private readonly ManualResetEventSlim _hasDataLock = new ManualResetEventSlim(false);
         private readonly AutoResetEvent _populatingLock = new AutoResetEvent(true);
         private readonly ReaderWriterLockSlim _updateLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         private T _cache;
         private DateTime _cacheLastUpdated = DateTime.MinValue;
+        protected TimeSpan _ttl = TimeSpan.FromMinutes(new Random().Next(5, 10));
 
         public T Data
         {
@@ -23,7 +23,10 @@ namespace TorExitNodeManager
                     if (_updateLock.TryEnterReadLock(2500))
                         return _cache;
                 }
-                finally { _updateLock.ExitReadLock(); }
+                finally
+                {
+                    _updateLock.ExitReadLock();
+                }
                 return new T();
             }
         }
@@ -39,7 +42,7 @@ namespace TorExitNodeManager
         {
             if (DateTime.UtcNow.Subtract(_cacheLastUpdated) > _ttl)
             {
-                Task.Factory.StartNew(new Action(PopulateCache));
+                Task.Factory.StartNew(PopulateCache);
 
                 _hasDataLock.Wait(2500);
             }
@@ -67,7 +70,9 @@ namespace TorExitNodeManager
                                 _cache = newCache;
                                 _cacheLastUpdated = DateTime.UtcNow;
                             }
-                            catch { }
+                            catch
+                            {
+                            }
                             finally
                             {
                                 _updateLock.ExitWriteLock();
@@ -76,8 +81,13 @@ namespace TorExitNodeManager
                         }
                     }
                 }
-                catch { }
-                finally { _populatingLock.Set(); }
+                catch
+                {
+                }
+                finally
+                {
+                    _populatingLock.Set();
+                }
             }
         }
     }
